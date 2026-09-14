@@ -1,4 +1,5 @@
-import type { Block, Theme } from "../../types";
+import { useState } from "react";
+import type { Approval, Block, Theme } from "../../types";
 
 function Page({
   theme,
@@ -28,14 +29,42 @@ function money(n: number): string {
   return n.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 }
 
+function SignatureForm({ onApprove }: { onApprove: (name: string) => void }) {
+  const [name, setName] = useState("");
+  return (
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Type your full name"
+        className="flex-1 rounded border border-stone-300 px-3 py-2 text-sm outline-none focus:border-stone-500"
+      />
+      <button
+        type="button"
+        disabled={!name.trim()}
+        onClick={() => onApprove(name.trim())}
+        className="rounded bg-stone-800 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700 disabled:opacity-40"
+      >
+        Approve Proposal
+      </button>
+    </div>
+  );
+}
+
 export function BlockDisplay({
   block,
   theme,
   pageRef,
+  approval,
+  interactive,
+  onApprove,
 }: {
   block: Block;
   theme: Theme;
   pageRef?: (el: HTMLDivElement | null) => void;
+  approval?: Approval;
+  interactive?: boolean;
+  onApprove?: (name: string) => void;
 }) {
   switch (block.type) {
     case "cover":
@@ -254,6 +283,35 @@ export function BlockDisplay({
             </div>
             <div>{block.contactEmail}</div>
             <div>{block.contactPhone}</div>
+          </div>
+        </Page>
+      );
+
+    case "signature":
+      return (
+        <Page theme={theme} pageRef={pageRef}>
+          <div className="flex h-full flex-col">
+            <h2 className="text-3xl font-semibold" style={{ fontFamily: theme.heading }}>
+              {block.heading}
+            </h2>
+            <p className="mt-4 whitespace-pre-wrap leading-relaxed">{block.agreementText}</p>
+            <div className="mt-auto border-t pt-6" style={{ borderColor: theme.subtext + "33" }}>
+              {approval ? (
+                <div
+                  className="rounded p-4 text-sm"
+                  style={{ background: theme.accent + "1a", color: theme.text }}
+                >
+                  ✓ Approved by <strong>{approval.name}</strong> on{" "}
+                  {new Date(approval.approvedAt).toLocaleDateString()}
+                </div>
+              ) : interactive && onApprove ? (
+                <SignatureForm onApprove={onApprove} />
+              ) : (
+                <p className="text-sm italic" style={{ color: theme.subtext }}>
+                  Recipients will see a name field and an "Approve Proposal" button here.
+                </p>
+              )}
+            </div>
           </div>
         </Page>
       );

@@ -5,9 +5,13 @@ import { BlockDisplay } from "./blocks/BlockDisplay";
 export function DeckView({
   proposal,
   registerPageRef,
+  interactive,
+  onApprove,
 }: {
   proposal: Proposal;
   registerPageRef?: (blockId: string, el: HTMLDivElement | null) => void;
+  interactive?: boolean;
+  onApprove?: (name: string) => void;
 }) {
   const theme = THEMES[proposal.themeId];
   const visibleBlocks = proposal.blocks.filter((b) => !b.hidden);
@@ -20,6 +24,9 @@ export function DeckView({
           block={block}
           theme={theme}
           pageRef={registerPageRef ? (el) => registerPageRef(block.id, el) : undefined}
+          approval={proposal.approval}
+          interactive={interactive}
+          onApprove={onApprove}
         />
       ))}
     </div>

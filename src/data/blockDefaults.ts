@@ -10,6 +10,7 @@ import type {
   MaterialsBlock,
   PortfolioBlock,
   TermsBlock,
+  SignatureBlock,
   CustomBlock,
 } from "../types";
 
@@ -22,6 +23,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   materials: "Materials & Process",
   portfolio: "Past Work",
   terms: "Terms & Contact",
+  signature: "Approval & Signature",
   custom: "Custom Section",
 };
 
@@ -98,6 +100,14 @@ function createBudget(): BudgetBlock {
       { id: uuid(), label: "Equipment", detail: "Lift/scaffold rental if needed", amount: 400 },
     ],
     showTotal: true,
+    estimator: {
+      widthFt: 20,
+      heightFt: 10,
+      surfaceType: "smooth",
+      ratePerSqFt: 12,
+      designFee: 500,
+      travelFee: 0,
+    },
   };
 }
 
@@ -140,6 +150,17 @@ function createTerms(): TermsBlock {
   };
 }
 
+function createSignature(): SignatureBlock {
+  return {
+    id: uuid(),
+    type: "signature",
+    title: BLOCK_LABELS.signature,
+    heading: "Approval & Next Steps",
+    agreementText:
+      "By approving this proposal, you agree to move forward with the project as described above, including scope, timeline, and budget.",
+  };
+}
+
 function createCustom(): CustomBlock {
   return {
     id: uuid(),
@@ -168,6 +189,8 @@ export function createBlock(type: BlockType): Block {
       return createPortfolio();
     case "terms":
       return createTerms();
+    case "signature":
+      return createSignature();
     case "custom":
       return createCustom();
   }
@@ -187,6 +210,7 @@ export function createStarterProposal() {
       createMaterials(),
       createPortfolio(),
       createTerms(),
+      createSignature(),
     ],
     createdAt: Date.now(),
     updatedAt: Date.now(),

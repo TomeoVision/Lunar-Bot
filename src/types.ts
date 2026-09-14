@@ -33,6 +33,17 @@ export interface GalleryImage {
   caption: string;
 }
 
+export type SurfaceType = "smooth" | "textured" | "brick" | "wood" | "concrete_block";
+
+export interface EstimatorConfig {
+  widthFt: number;
+  heightFt: number;
+  surfaceType: SurfaceType;
+  ratePerSqFt: number;
+  designFee: number;
+  travelFee: number;
+}
+
 export type BlockType =
   | "cover"
   | "about"
@@ -42,6 +53,7 @@ export type BlockType =
   | "materials"
   | "portfolio"
   | "terms"
+  | "signature"
   | "custom";
 
 interface BlockBase {
@@ -90,6 +102,7 @@ export interface BudgetBlock extends BlockBase {
   note: string;
   items: LineItem[];
   showTotal: boolean;
+  estimator: EstimatorConfig;
 }
 
 export interface MaterialsBlock extends BlockBase {
@@ -115,6 +128,12 @@ export interface TermsBlock extends BlockBase {
   contactPhone: string;
 }
 
+export interface SignatureBlock extends BlockBase {
+  type: "signature";
+  heading: string;
+  agreementText: string;
+}
+
 export interface CustomBlock extends BlockBase {
   type: "custom";
   heading: string;
@@ -130,13 +149,20 @@ export type Block =
   | MaterialsBlock
   | PortfolioBlock
   | TermsBlock
+  | SignatureBlock
   | CustomBlock;
+
+export interface Approval {
+  name: string;
+  approvedAt: number;
+}
 
 export interface Proposal {
   id: string;
   title: string;
   themeId: ThemeId;
   blocks: Block[];
+  approval?: Approval;
   createdAt: number;
   updatedAt: number;
 }
@@ -145,4 +171,31 @@ export interface ProposalMeta {
   id: string;
   title: string;
   updatedAt: number;
+}
+
+export interface LibraryBio {
+  id: string;
+  label: string;
+  artistName: string;
+  headshot: string;
+  body: string;
+}
+
+export interface LibraryImageItem {
+  id: string;
+  label: string;
+  src: string;
+  caption: string;
+}
+
+export interface LibrarySnippet {
+  id: string;
+  label: string;
+  body: string;
+}
+
+export interface ContentLibraryData {
+  bios: LibraryBio[];
+  images: LibraryImageItem[];
+  snippets: LibrarySnippet[];
 }

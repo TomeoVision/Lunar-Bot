@@ -7,6 +7,13 @@ import type {
 } from "../types";
 import { Field, TextInput, TextArea, NumberInput } from "./Field";
 import { ImageInput } from "./ImageInput";
+import {
+  BioLibraryControl,
+  ImageLibraryControl,
+  SnippetLibraryControl,
+  saveImageToLibraryPrompt,
+} from "./LibraryControls";
+import { BudgetEstimator } from "./BudgetEstimator";
 
 function GalleryEditor({
   images,
@@ -27,6 +34,7 @@ function GalleryEditor({
 
   return (
     <div className="flex flex-col gap-3">
+      <ImageLibraryControl onInsert={(img) => onChange([...images, { id: uuid(), src: img.src, caption: img.caption }])} />
       {images.map((img) => (
         <div key={img.id} className="flex items-start gap-3 rounded border border-stone-200 p-2">
           <ImageInput value={img.src} onChange={(src) => update(img.id, { src })} />
@@ -36,13 +44,24 @@ function GalleryEditor({
               value={img.caption}
               onChange={(e) => update(img.id, { caption: e.target.value })}
             />
-            <button
-              type="button"
-              onClick={() => remove(img.id)}
-              className="self-start text-xs text-stone-400 hover:text-red-500"
-            >
-              Remove image
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => remove(img.id)}
+                className="self-start text-xs text-stone-400 hover:text-red-500"
+              >
+                Remove image
+              </button>
+              {img.src && (
+                <button
+                  type="button"
+                  onClick={() => saveImageToLibraryPrompt(img.src, img.caption)}
+                  className="self-start text-xs text-stone-400 hover:text-stone-700"
+                >
+                  Save to library
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ))}
@@ -93,6 +112,10 @@ export function BlockEditorForm({
     case "about":
       return (
         <div className="flex flex-col gap-4">
+          <BioLibraryControl
+            onInsert={(bio) => onChange({ ...block, artistName: bio.artistName, headshot: bio.headshot, body: bio.body })}
+            onSaveRequest={() => ({ artistName: block.artistName, headshot: block.headshot, body: block.body })}
+          />
           <Field label="Section heading">
             <TextInput value={block.heading} onChange={(e) => onChange({ ...block, heading: e.target.value })} />
           </Field>
@@ -213,6 +236,11 @@ export function BlockEditorForm({
           <Field label="Note">
             <TextArea rows={2} value={block.note} onChange={(e) => onChange({ ...block, note: e.target.value })} />
           </Field>
+          <BudgetEstimator
+            estimator={block.estimator}
+            onChangeEstimator={(estimator) => onChange({ ...block, estimator })}
+            onAddLineItems={(newItems) => onChange({ ...block, items: [...block.items, ...newItems] })}
+          />
           <div className="flex flex-col gap-3">
             {block.items.map((it) => (
               <div key={it.id} className="rounded border border-stone-200 p-3">
@@ -287,6 +315,10 @@ export function BlockEditorForm({
           <Field label="Section heading">
             <TextInput value={block.heading} onChange={(e) => onChange({ ...block, heading: e.target.value })} />
           </Field>
+          <SnippetLibraryControl
+            onInsert={(s) => onChange({ ...block, body: s.body })}
+            onSaveRequest={() => block.body}
+          />
           <Field label="Body">
             <TextArea rows={3} value={block.body} onChange={(e) => onChange({ ...block, body: e.target.value })} />
           </Field>
@@ -332,6 +364,10 @@ export function BlockEditorForm({
           <Field label="Section heading">
             <TextInput value={block.heading} onChange={(e) => onChange({ ...block, heading: e.target.value })} />
           </Field>
+          <SnippetLibraryControl
+            onInsert={(s) => onChange({ ...block, body: s.body })}
+            onSaveRequest={() => block.body}
+          />
           <Field label="Terms">
             <TextArea rows={4} value={block.body} onChange={(e) => onChange({ ...block, body: e.target.value })} />
           </Field>
@@ -347,12 +383,37 @@ export function BlockEditorForm({
         </div>
       );
 
+    case "signature":
+      return (
+        <div className="flex flex-col gap-4">
+          <Field label="Section heading">
+            <TextInput value={block.heading} onChange={(e) => onChange({ ...block, heading: e.target.value })} />
+          </Field>
+          <Field label="Agreement text">
+            <TextArea
+              rows={4}
+              value={block.agreementText}
+              onChange={(e) => onChange({ ...block, agreementText: e.target.value })}
+            />
+          </Field>
+          <p className="rounded bg-stone-50 p-3 text-xs text-stone-500">
+            Recipients viewing your share link will see a name field and an "Approve Proposal"
+            button here. When they approve, they'll get a confirmation link to send back to you —
+            use "Import approval" in the toolbar above to pull it into this proposal.
+          </p>
+        </div>
+      );
+
     case "custom":
       return (
         <div className="flex flex-col gap-4">
           <Field label="Section heading">
             <TextInput value={block.heading} onChange={(e) => onChange({ ...block, heading: e.target.value })} />
           </Field>
+          <SnippetLibraryControl
+            onInsert={(s) => onChange({ ...block, body: s.body })}
+            onSaveRequest={() => block.body}
+          />
           <Field label="Body">
             <TextArea rows={6} value={block.body} onChange={(e) => onChange({ ...block, body: e.target.value })} />
           </Field>

@@ -49,12 +49,20 @@ export function Library() {
             Build a proposal deck for a mural or project, then share a link or export a PDF.
           </p>
         </div>
-        <button
-          onClick={createNew}
-          className="rounded bg-stone-800 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
-        >
-          + New proposal
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/content")}
+            className="rounded border border-stone-300 px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
+          >
+            Content Library
+          </button>
+          <button
+            onClick={createNew}
+            className="rounded bg-stone-800 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
+          >
+            + New proposal
+          </button>
+        </div>
       </div>
 
       <div className="mt-8 flex flex-col gap-2">

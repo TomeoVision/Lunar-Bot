@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { Block, Proposal } from "../types";
 import { loadProposal, saveProposal } from "../lib/storage";
 import { createStarterProposal } from "../data/blockDefaults";
-import { buildShareUrl } from "../lib/share";
+import { buildShareUrl, decodeProposalFromShare, extractShareData } from "../lib/share";
 import { exportPagesToPdf } from "../lib/pdf";
 import { Sidebar } from "../components/Sidebar";
 import { BlockEditorForm } from "../components/BlockEditorForm";
@@ -94,6 +94,19 @@ export function Editor() {
     setTimeout(() => setShareStatus(null), 4000);
   }
 
+  function handleImportApproval() {
+    if (!proposal) return;
+    const url = window.prompt("Paste the confirmation link the client sent you:");
+    if (!url) return;
+    const data = extractShareData(url);
+    const decoded = data ? decodeProposalFromShare(data) : null;
+    if (!decoded || !decoded.approval) {
+      window.alert("That link doesn't contain an approval.");
+      return;
+    }
+    setProposal({ ...proposal, approval: decoded.approval });
+  }
+
   async function handleExportPdf() {
     if (!proposal) return;
     setExporting(true);
@@ -112,6 +125,9 @@ export function Editor() {
         <button onClick={() => navigate("/")} className="text-sm text-stone-500 hover:text-stone-800">
           ← Library
         </button>
+        <button onClick={() => navigate("/content")} className="text-sm text-stone-500 hover:text-stone-800">
+          Content Library
+        </button>
         <Field label="">
           <TextInput
             value={proposal.title}
@@ -120,12 +136,23 @@ export function Editor() {
           />
         </Field>
         <ThemePicker value={proposal.themeId} onChange={(themeId) => setProposal({ ...proposal, themeId })} />
+        {proposal.approval && (
+          <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800">
+            ✓ Approved by {proposal.approval.name}
+          </span>
+        )}
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => setMode(mode === "edit" ? "preview" : "edit")}
             className="rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
           >
             {mode === "edit" ? "Preview" : "Back to editing"}
+          </button>
+          <button
+            onClick={handleImportApproval}
+            className="rounded border border-stone-300 px-3 py-1.5 text-sm font-medium hover:bg-stone-50"
+          >
+            Import approval
           </button>
           <button
             onClick={handleShare}
